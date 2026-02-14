@@ -33,7 +33,7 @@ npm install
 Crea un archivo `.env` basándote en `.env.example`. Ejemplo:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/imix-ai
+MONGODB_URI=mongodb://localhost:27017/prueba_db
 ```
 
 Luego ejecuta:
