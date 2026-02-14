@@ -1,0 +1,127 @@
+<div class="layout">
+  <!-- Sidebar expandible -->
+  <aside class="sidebar" [class.sidebar--cerrado]="!sidebarAbierto">
+    <div class="sidebar__header">
+      <div class="sidebar__header-top">
+        <h2 class="sidebar__titulo">Historial</h2>
+        <button type="button" class="sidebar__toggle" (click)="toggleSidebar()" [attr.aria-label]="sidebarAbierto ? 'Cerrar historial' : 'Abrir historial'" title="{{ sidebarAbierto ? 'Cerrar' : 'Abrir' }} historial">
+          @if (sidebarAbierto) {
+            <span class="sidebar__toggle-icon">←</span>
+          } @else {
+            <span class="sidebar__toggle-icon">→</span>
+          }
+        </button>
+      </div>
+      @if (sidebarAbierto) {
+        <p class="sidebar__subtitulo">Solicitudes guardadas en base de datos</p>
+      }
+      @if (!sidebarAbierto) {
+        <span class="sidebar__label-cerrado" aria-hidden="true">Historial</span>
+      }
+    </div>
+    @if (sidebarAbierto) {
+    <div class="sidebar__list">
+      @if (loadingHistorial) {
+        <div class="historial-empty">
+          <span class="estado-proceso__spinner" aria-hidden="true"></span>
+          <span>Cargando…</span>
+        </div>
+      } @else if (historial.length === 0) {
+        <p class="historial-empty">Aún no hay solicitudes. Envía la primera.</p>
+      } @else {
+        @for (s of historial; track s.id) {
+          <button
+            type="button"
+            class="historial-item"
+            [class.historial-item--active]="selectedId === s.id"
+            (click)="seleccionarSolicitud(s.id)"
+          >
+            <span class="historial-item__texto">{{ truncar(s.texto, 50) }}</span>
+            <span class="historial-item__fecha">{{ formatearFecha(s.createdAt) }}</span>
+          </button>
+        }
+      }
+    </div>
+    }
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="main">
+    <div class="container">
+      <header class="page-header">
+        <h1>Enviar solicitud</h1>
+        <p>Escribe el texto y envíalo para procesarlo y enriquecerlo con IA.</p>
+      </header>
+
+      <form class="form-card" (ngSubmit)="enviar()">
+        <div class="form-group">
+          <label for="texto">Texto de la solicitud</label>
+          <textarea
+            id="texto"
+            name="texto"
+            [(ngModel)]="texto"
+            placeholder="Escribe aquí el contenido a procesar..."
+            [disabled]="estado === 'enviando'"
+          ></textarea>
+        </div>
+        <button type="submit" class="btn" [disabled]="estado === 'enviando' || !texto.trim()">
+          {{ estado === 'enviando' ? 'Procesando…' : 'Enviar' }}
+        </button>
+      </form>
+
+      <section class="estado-proceso" aria-live="polite">
+        <h2 class="estado-proceso__titulo">Estado del proceso</h2>
+        @switch (estado) {
+          @case ('idle') {
+            <p class="estado estado--idle">Listo. Escribe un texto y pulsa Enviar.</p>
+          }
+          @case ('enviando') {
+            <div class="estado estado--enviando">
+              <span class="estado-proceso__spinner" aria-hidden="true"></span>
+              <div>
+                <strong>Procesando…</strong>
+                <p class="estado-proceso__detalle">Guardando en base de datos y simulando enriquecimiento con IA.</p>
+              </div>
+            </div>
+          }
+          @case ('error') {
+            <div class="estado estado--error">
+              <strong>Error</strong>
+              <p>{{ error }}</p>
+            </div>
+          }
+          @case ('ok') {
+            <div class="estado estado--ok">
+              <strong>Completado.</strong> La solicitud se procesó correctamente.
+            </div>
+          }
+        }
+      </section>
+
+      <!-- Un solo bloque: detalle guardado (respuesta recién enviada o ítem del historial) -->
+      @if (detalleActual || loadingDetalle) {
+        <section class="respuesta">
+          <h2 class="respuesta__titulo">Guardado en base de datos</h2>
+          @if (loadingDetalle) {
+            <div class="estado estado--enviando">
+              <span class="estado-proceso__spinner" aria-hidden="true"></span>
+              <span>Cargando detalle…</span>
+            </div>
+          } @else if (detalleActual) {
+            <div class="respuesta__card">
+              <p class="respuesta__meta"><strong>ID:</strong> {{ detalleActual.id }} · <strong>Fecha:</strong> {{ formatearFecha(detalleActual.createdAt) }}</p>
+              <div class="respuesta__campo">
+                <span class="respuesta__etiqueta">Texto original</span>
+                <p class="respuesta__valor">{{ detalleActual.texto }}</p>
+              </div>
+              <div class="respuesta__campo respuesta__campo--destacado">
+                <span class="respuesta__etiqueta">Texto enriquecido (IA)</span>
+                <p class="respuesta__valor">{{ detalleActual.textoEnriquecido }}</p>
+              </div>
+            </div>
+          }
+        </section>
+      }
+    </div>
+  </main>
+</div>
