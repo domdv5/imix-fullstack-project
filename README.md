@@ -17,20 +17,22 @@ Servicio que **recibe solicitudes**, las guarda en MongoDB, **simula enriquecimi
 - Angular CLI: `npm i -g @angular/cli`
 - Nest CLI: `npm i -g @nestjs/cli`
 
-### 1. MongoDB
+Abra el proyecto en un editor de código (por ejemplo, Visual Studio Code), luego acceda a la terminal integrada y ejecute el siguiente comando.
+
+### 1. MongoDB (Terminal 1)
 
 ```bash
 docker-compose up -d
 ```
 
-### 2. Backend
+### 2. Backend (Terminal 2)
 
 ```bash
 cd backend
 npm install
 ```
 
-Crea un archivo `.env` basándote en `.env.example`. Ejemplo:
+Crea un archivo `.env` basándote en `.env.example`:
 
 ```env
 MONGODB_URI=mongodb://localhost:27017/prueba_db
@@ -44,7 +46,7 @@ npm run start:dev
 
 API: `http://localhost:3000`
 
-### 3. Frontend
+### 3. Frontend (Terminal 3)
 
 ```bash
 cd frontend
