@@ -1,6 +1,6 @@
 # Prueba Técnica - Desarrollador/a Full Stack (Imix)
 
-Servicio que **recibe solicitudes**, las guarda en MongoDB, **simula enriquecimiento con IA** y devuelve el resultado vía API. Frontend en Angular para enviar la solicitud, ver estado y respuesta.
+Servicio que **recibe solicitudes**, las guarda en MongoDB, **simula enriquecimiento con IA**, Muestra el historial de las mismas y devuelve el resultado vía API. Frontend en Angular para enviar la solicitud, ver estado y respuesta.
 
 **Stack:** Angular + NestJS + MongoDB (Docker).
 
