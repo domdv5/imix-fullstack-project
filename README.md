@@ -74,96 +74,88 @@ Respuestas a las preguntas de diseño del enunciado, agrupadas por tema.
 
 ### 1. Esquema de capas y protección de la información
 
-La solución está organizada en capas con responsabilidades claras: orden, seguridad y mantenibilidad.
+Se propone organizar la solución en capas con responsabilidades claras: orden, seguridad y mantenibilidad.
 
 | Capa | Responsabilidad |
-|------|-----------------|
-| **Presentación (Angular)** | Interacción con el usuario: enviar solicitudes y mostrar resultados. No contiene lógica de negocio ni información sensible. |
-| **API (NestJS – Controllers)** | Entrada al sistema: recibe peticiones, valida datos y controla el acceso. No expone datos sensibles; solo deja pasar información ya validada. |
-| **Servicios (lógica de negocio)** | Orquesta el flujo: persistencia, llamada al servicio de IA y reglas de negocio. Decide qué información se devuelve al cliente. |
-| **Persistencia (MongoDB)** | Solo almacenamiento y recuperación. Sin lógica de negocio ni seguridad; se accede únicamente desde la capa de servicios. |
+|------|------------------|
+| **Presentación** | UI (Angular): interacción usuario, envío de solicitudes, visualización de resultados. Sin lógica de negocio ni información sensible. |
+| **API (Controllers)** | Entrada al sistema: recibe peticiones, valida datos, controla acceso. No expone datos sensibles; solo información validada. |
+| **Servicios (lógica de negocio)** | Orquesta flujo: persistencia, servicios externos (IA), reglas de negocio. Decide qué información devuelve. |
+| **Persistencia (MongoDB)** | Solo almacenamiento y recuperación. Sin lógica de negocio ni seguridad; acceso únicamente desde servicios. |
 
 ---
 
 ### 2. Recuperación de datos del usuario
 
-La información del usuario se obtiene inicialmente durante el proceso de autenticación, donde se valida su identidad y se recuperan los datos principales.
+Se propone obtener información del usuario inicialmente durante autenticación, validando identidad y recuperando datos principales.
 
-En el token JWT se incluyen únicamente los identificadores mínimos necesarios (por ejemplo, id y rol), evitando almacenar información sensible o voluminosa.
+En el token JWT se incluyen únicamente identificadores mínimos necesarios (id, rol), evitando información sensible o voluminosa.
 
-Al inicio de cada solicitud, el backend utiliza esta información para cargar los datos del usuario desde un sistema de cache (por ejemplo, Redis) o, en su defecto, desde la base de datos.
-Esta información se almacena en el contexto de la petición y se reutiliza durante todo el ciclo del request, evitando múltiples consultas repetidas.
+Al inicio de cada solicitud, el backend usa este token para cargar datos desde cache (Redis) o base de datos. Esta información se almacena en contexto de petición y se reutiliza durante todo el ciclo del request, evitando consultas repetidas.
 
-De esta forma, los datos del usuario se consultan una sola vez por solicitud y pueden ser reutilizados en las diferentes etapas del procesamiento, mejorando el rendimiento y manteniendo la seguridad.
-
-Este enfoque permite equilibrar eficiencia, escalabilidad y protección de la información.
+De esta forma, datos del usuario se consultan una sola vez por solicitud y pueden reutilizarse en diferentes etapas, mejorando rendimiento y manteniendo seguridad. Este enfoque equilibra eficiencia, escalabilidad y protección de información.
 
 ---
 
 ### 3. Responsabilidad de seguridad (quién valida al usuario)
-La responsabilidad de la seguridad se maneja en una capa previa a la lógica de negocio, mediante middlewares y guards en el backend.
 
-Estos componentes se encargan de validar el token, verificar permisos y autorizar la solicitud antes de que llegue a los controladores y servicios.
+Se propone manejar seguridad en una capa previa a la lógica de negocio, mediante middlewares y guards en el backend.
 
-De esta forma, la capa de servicios no tiene conocimiento del usuario ni de los mecanismos de autenticación, y se enfoca únicamente en el procesamiento de la información.
+Estos componentes validan token, verifican permisos y autorizan la solicitud ANTES de llegar a controllers y servicios.
+
+De esta forma, la capa de servicios no tiene conocimiento del usuario ni de mecanismos de autenticación, enfocándose únicamente en procesamiento de información.
 
 ---
 
 ### 4. Interfaz web y móvil con distinto look & feel
 
-En el caso de requerir dos aplicaciones (web y móvil) con funcionalidades similares pero con estilos y experiencia de usuario diferentes, se propone un backend único para ambas plataformas.
+En caso de requerir dos aplicaciones (web y móvil) con funcionalidades similares pero estilos distintos, se propone un backend único para ambas plataformas.
 
-Este backend expone una API REST con contratos de datos estables (API Contract), permitiendo que todos los clientes consuman la información de la misma forma.
-Esto es especialmente adecuado para aplicaciones cuya estructura de datos no cambia con frecuencia.
+Este backend expone una API REST con contratos de datos estables (API Contract), permitiendo que todos los clientes consuman información de la misma forma. Esto es especialmente adecuado para aplicaciones cuya estructura no cambia frecuentemente.
 
-Para evitar que los cambios en la API afecten a todas las aplicaciones, se implementa un sistema de versionado (por ejemplo, /api/v1, /api/v2).
-De esta manera, es posible realizar modificaciones para una plataforma sin afectar a las demás.
+Para evitar que cambios en API afecten todas las apps, se implementa versionado (/api/v1, /api/v2), permitiendo modificaciones para una plataforma sin afectar otras.
 
-En escenarios donde la aplicación evoluciona constantemente o donde las necesidades de web y móvil son muy diferentes, se puede implementar un patrón Backend for Frontend (BFF).
-Esto permite adaptar las respuestas a cada cliente, distribuir la carga y evitar un único punto de entrada central difícil de mantener en el tiempo.
+En escenarios donde la aplicación evoluciona constantemente o necesidades de web y móvil son muy diferentes, se puede implementar Backend for Frontend (BFF), adaptando respuestas por cliente, distribuyendo carga, evitando un único punto central difícil de mantener.
 
-Este enfoque permite garantizar una experiencia consistente entre plataformas, manteniendo la simplicidad, escalabilidad y facilidad de mantenimiento.
+Este enfoque garantiza experiencia consistente entre plataformas, manteniendo simplicidad, escalabilidad y facilidad de mantenimiento.
 
 ---
 
 ### 5. Manejo de sesión
 
-El manejo de sesión se basa en autenticación mediante JSON Web Tokens (JWT), siguiendo un enfoque stateless, donde el servidor no mantiene estado de sesión en memoria.
+Se propone basarse en autenticación mediante JSON Web Tokens (JWT), siguiendo enfoque stateless donde servidor no mantiene estado de sesión en memoria.
 
-Una vez autenticado, el usuario recibe un token firmado que contiene la información necesaria para su identificación. Este token se envía en cada solicitud al backend a través del header Authorization.
+Una vez autenticado, usuario recibe token firmado con información necesaria para identificación. Este token se envía en cada solicitud al backend via header Authorization.
 
-La validación del token se realiza mediante guards en NestJS antes de acceder a la lógica de negocio.
+Validación ocurre mediante guards en NestJS antes de acceder a lógica de negocio.
 
-Para garantizar la seguridad, los tokens tienen un tiempo de expiración limitado.
-Adicionalmente, se implementa un mecanismo de refresh token que permite renovar la sesión sin requerir que el usuario inicie sesión nuevamente.
+Para garantizar seguridad, tokens tienen tiempo de expiración limitado. Se implementa mecanismo de refresh token que permite renovar sesión sin requerir nuevo login.
 
-Los refresh tokens pueden almacenarse de forma segura (por ejemplo, en cookies HttpOnly o en base de datos) y se utilizan únicamente para generar nuevos tokens de acceso.
+Refresh tokens almacenados de forma segura (cookies HttpOnly o BD) se utilizan únicamente para generar nuevos tokens de acceso.
 
 ---
 
 ### 6. Protección de información sensible sin consultar la BD en cada request
 
-La información sensible del usuario se mantiene únicamente en el backend y nunca se expone directamente al frontend.
+Se propone mantener información sensible únicamente en backend, nunca exponerla directamente al frontend.
 
-El cliente solo envía un token JWT con los identificadores básicos.
-Con este token, el backend recupera los datos necesarios desde un sistema de cache (por ejemplo, Redis) o desde la base de datos si no están en cache.
+Cliente envía token JWT con identificadores básicos. Con este token, backend recupera datos necesarios desde cache (Redis) o base de datos si no están en cache.
 
-Esta información se almacena en el contexto de la solicitud y se utiliza durante todo el procesamiento, evitando consultas repetidas a la base de datos.
+Esta información se almacena en contexto de solicitud y se utiliza durante procesamiento, evitando consultas repetidas a BD.
 
-Además, las respuestas de la API son filtradas para devolver únicamente los datos necesarios para la interfaz, garantizando que la información confidencial no sea expuesta.
+Además, respuestas de API se filtran para devolver únicamente datos que la interfaz necesita, garantizando que información confidencial no sea expuesta.
 
 ---
 
 ### 7. Integración con Single Sign-On (SSO)
 
-Se implementa un proveedor de identidad centralizado como Keycloak, encargado de gestionar la autenticación de usuarios, credenciales y sesiones.
+Se propone implementar un proveedor de identidad centralizado como Keycloak, encargado de gestionar autenticación de usuarios, credenciales y sesiones.
 
-Las aplicaciones web y móvil redirigen al usuario a Keycloak para iniciar sesión.
-Una vez autenticado, Keycloak valida las credenciales y emite un token JWT firmado con la información del usuario y sus roles.
+Aplicaciones web y móvil redirigen usuario a Keycloak para iniciar sesión. Una vez autenticado, Keycloak valida credenciales y emite token JWT firmado con información del usuario y sus roles.
 
 Este token es utilizado para acceder al backend, donde es validado mediante guards, sin necesidad de manejar contraseñas o procesos de login propios.
 
-De esta forma, se centraliza la seguridad, se evita duplicar credenciales y se garantiza una experiencia de autenticación unificada entre aplicaciones.
+De esta forma, se centraliza seguridad, se evita duplicar credenciales y se garantiza experiencia de autenticación unificada entre aplicaciones.
 
 ---
 
