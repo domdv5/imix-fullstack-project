@@ -220,10 +220,12 @@ Este enfoque permite facilitar la escalabilidad, automatizar despliegues y reduc
 
 ### ¿Qué mejorarías en producción?
 
-- **Seguridad:** Autenticación JWT en endpoints críticos, validar y sanitizar inputs, CORS restringido por entorno.
+- **Seguridad:** Autenticación JWT en endpoints críticos, asi como manejar control de acceso basado en roles (RBAC)
+- **Manejo de errores:** Utilizar exception filters de NestJS para centralizar el manejo de errores en un unico archivo lo cual es benifecioso para un tema de control y escalabilidad.
 - **Base de datos:** Índices en campos de búsqueda, paginación para listar resultados, backups automáticos.
-- **Escalabilidad:** Múltiples instancias del backend con load balancer, procesar IA en background con queue, cache en frontend.
-- **Testing:** Tests unitarios en service, tests de integración en API, cobertura mínima en lógica crítica.
+- **Configuración:** Variables de entorno para BD, puerto, CORS, secrets (NODE_ENV, API_PORT, CORS_ORIGIN, JWT_SECRET).
+- **Documentación API:** Swagger/OpenAPI para documentar endpoints automáticamente, facilitar testing y cliente side generation.
+- **Escalabilidad:** Múltiples instancias del backend con load balancer, procesar IA en background con queue (Redis).
 
 ### ¿Dónde pondrías límites de responsabilidad entre servicios?
 
