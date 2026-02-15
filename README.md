@@ -227,7 +227,7 @@ Este enfoque permite facilitar la escalabilidad, automatizar despliegues y reduc
 - **Base de datos:** Índices en campos de búsqueda, paginación para listar resultados, backups automáticos.
 - **Configuración:** Variables de entorno para BD, puerto, CORS, secrets (NODE_ENV, API_PORT, CORS_ORIGIN, JWT_SECRET).
 - **Documentación API:** Swagger/OpenAPI para documentar endpoints automáticamente, facilitar testing y cliente side generation.
-- **Escalabilidad:** Múltiples instancias del backend con load balancer, procesar IA en background con queue (Redis).
+- **Escalabilidad:** Se soporta mediante múltiples instancias del backend detrás de un load balancer, permitiendo manejar mayor concurrencia y alta disponibilidad; El procesamiento de IA se desacopla mediante una cola (por ejemplo Redis), ejecutándose en background para evitar bloquear las solicitudes y mejorar el rendimiento.
 
 ### ¿Dónde pondrías límites de responsabilidad entre servicios?
 
